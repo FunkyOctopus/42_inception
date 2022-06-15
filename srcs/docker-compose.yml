@@ -1,0 +1,62 @@
+version: '3.5'
+
+
+networks:
+  networkname: {}
+
+
+services:
+  nginx:
+    build: ./requirements/nginx
+    container_name: nginx_c
+    depends_on:
+      - wordpress
+      - mariadb
+    env_file: .env
+    image: nginx
+    ports:
+      - "443:443"
+    networks:
+      - networkname
+    restart: always
+    volumes:
+      - wordpress_v:/var/www/wordpress
+
+  wordpress:
+    build: ./requirements/wordpress
+    container_name: wordpress_c
+    depends_on:
+      - mariadb
+    env_file: .env
+    image: wordpress
+    networks:
+      - networkname
+    restart: always
+    volumes:
+      - wordpress_v:/var/www/wordpress
+
+  mariadb:
+    build: ./requirements/mariadb
+    container_name: mariadb_c
+    image: mariadb
+    env_file: .env
+    networks:
+      - networkname
+    restart: always
+    volumes:
+      - mariadb_v:/var/lib/mysql
+
+
+volumes:
+  wordpress_v:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/olgerret/data/wordpress
+  mariadb_v:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/olgerret/data/mariadb
